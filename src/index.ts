@@ -1,5 +1,6 @@
-import {server} from "./server";
+import {server} from './server';
+import 'dotenv/config';
 
-server.listen(3000, () => {
-    console.log("Se quiser sim mano");
-})
+server.listen(process.env.PORT, () => {
+    console.log(`App rodando na porta ${process.env.PORT}`);
+});
