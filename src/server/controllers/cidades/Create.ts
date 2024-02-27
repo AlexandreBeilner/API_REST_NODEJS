@@ -1,39 +1,44 @@
-import {Request, Response} from 'express';
+import {Request, RequestHandler, Response} from 'express';
 import * as yup from 'yup';
+import {validation} from '../../shared/middlewares';
+import {StatusCodes} from 'http-status-codes';
 
 interface ICidade {
     nome: string,
-    estado: string
 }
 
 const bodyValidator: yup.Schema<ICidade> = yup.object().shape({
     nome: yup.string().required().min(3),
-    estado: yup.string().required().min(3),
 });
 
-const create = async (req: Request<{}, {}, ICidade>, res: Response) => {
-    let validateData: ICidade | undefined = undefined;
+//isso abaixo é um middlaware, é uma maneira de execurar alguma coisa antes da requisição ser processada
+//o next() dentro do try faz ele passar para o proximo metodo da fila
+//caso caia no catch ele encera o processo
+export const createBodyValidator: RequestHandler = async (req, res, next) => {
     try {
-        validateData = await bodyValidator.validate(req.body, {abortEarly: false});
-    }catch (e){
+        await bodyValidator.validate(req.body, {abortEarly: false});
+        next();
+    } catch (e) {
         const yupError = e as yup.ValidationError;
         const errors: Record<string, string> = {};
 
         yupError.inner.forEach(err => {
-            if(!err.path) return;
+            if (!err.path) return;
             errors[err.path] = err.message;
         });
 
-        return res.json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
             errors
         });
     }
+};
 
+export const createValidation = validation((getSchema) => ({body: getSchema<ICidade>(bodyValidator)}));
 
-    console.log(validateData);
+const create = async (req: Request<{}, {}, ICidade>, res: Response) => {
+    console.log(req.body);
 
-
-    return res.send('Criado');
+    return res.status(StatusCodes.CREATED).json(1);
 };
 
 export {create};
