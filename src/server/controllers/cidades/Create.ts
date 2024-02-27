@@ -2,12 +2,11 @@ import {Request, RequestHandler, Response} from 'express';
 import * as yup from 'yup';
 import {validation} from '../../shared/middlewares';
 import {StatusCodes} from 'http-status-codes';
+import {ICidade} from '../../database/models';
 
-interface ICidade {
-    nome: string,
-}
+interface IBodyProps extends Omit<ICidade, 'id'> { }
 
-const bodyValidator: yup.Schema<ICidade> = yup.object().shape({
+const bodyValidator: yup.Schema<IBodyProps> = yup.object().shape({
     nome: yup.string().required().min(3),
 });
 
@@ -33,9 +32,9 @@ export const createBodyValidator: RequestHandler = async (req, res, next) => {
     }
 };
 
-export const createValidation = validation((getSchema) => ({body: getSchema<ICidade>(bodyValidator)}));
+export const createValidation = validation((getSchema) => ({body: getSchema<IBodyProps>(bodyValidator)}));
 
-const create = async (req: Request<{}, {}, ICidade>, res: Response) => {
+const create = async (req: Request<{}, {}, IBodyProps>, res: Response) => {
     console.log(req.body);
 
     return res.status(StatusCodes.CREATED).json(1);
