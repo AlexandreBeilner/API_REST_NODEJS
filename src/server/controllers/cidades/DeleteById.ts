@@ -2,8 +2,9 @@ import {Request, Response} from 'express';
 import * as yup from 'yup';
 import {validation} from '../../shared/middlewares';
 import {StatusCodes} from 'http-status-codes';
+import {CidadesProvider} from '../../database/providers/Cidades';
 
-interface IParamProps {
+export interface IParamProps {
     id?: number | null;
 }
 
@@ -14,9 +15,24 @@ const paramsValidator: yup.Schema<IParamProps> = yup.object().shape({
 export const deleteByIdValidation = validation((getSchema) => ({params: getSchema<IParamProps>(paramsValidator)}));
 
 export const deleteById = async (req: Request<IParamProps>, res: Response) => {
-    console.log(req.params);
+    if(!req.params.id){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            error: {
+                default: 'O parametro "id" precisa ser informado'
+            }
+        });
+    }
+    const result = await CidadesProvider.deleteById(req.params.id);
 
-    return res.status(StatusCodes.NO_CONTENT).send('Não implementado');
+    if(result instanceof Error){
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errors: {
+                default : result.message,
+            }
+        });
+    }
+
+    return res.status(StatusCodes.NO_CONTENT).send();
 };
 
 

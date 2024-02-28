@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import * as yup from 'yup';
 import {validation} from '../../shared/middlewares';
 import {StatusCodes} from 'http-status-codes';
+import {CidadesProvider} from '../../database/providers/Cidades';
 
 interface IParamProps {
     id?: number | null;
@@ -14,9 +15,24 @@ const paramsValidator: yup.Schema<IParamProps> = yup.object().shape({
 export const getByIdValidation = validation((getSchema) => ({params: getSchema<IParamProps>(paramsValidator)}));
 
 export const getById = async (req: Request<IParamProps>, res: Response) => {
-    console.log(req.params);
+    if(!req.params.id){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            error: {
+                default: 'O parametro "id" precisa ser informado'
+            }
+        });
+    }
+    const result = await CidadesProvider.getById(req.params.id);
 
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send('Não implementado');
+    if(result instanceof Error){
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errors: {
+                default : result.message,
+            }
+        });
+    }
+
+    return res.status(StatusCodes.OK).json(result);
 };
 
 

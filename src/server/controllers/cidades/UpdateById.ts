@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import {validation} from '../../shared/middlewares';
 import {StatusCodes} from 'http-status-codes';
 import {ICidade} from '../../database/models';
+import {CidadesProvider} from '../../database/providers/Cidades';
 
 interface IParamProps {
     id?: number;
@@ -26,10 +27,25 @@ export const updateByIdValidation =
         }));
 
 export const updateById = async (req: Request<IParamProps, {}, IBodyProps>, res: Response) => {
-    console.log(req.params);
-    console.log(req.body);
+    if(!req.params.id){
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            error: {
+                default: 'O parametro "id" precisa ser informado'
+            }
+        });
+    }
 
-    return res.status(StatusCodes.OK).send('Não implementado');
+    const result = await CidadesProvider.updateById(req.params.id, req.body);
+
+    if(result instanceof Error){
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errors: {
+                default : result.message,
+            }
+        });
+    }
+
+    return res.status(StatusCodes.NO_CONTENT).send(result);
 };
 
 
