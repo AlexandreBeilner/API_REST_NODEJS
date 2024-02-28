@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import * as yup from 'yup';
 import {validation} from '../../shared/middlewares';
 import {StatusCodes} from 'http-status-codes';
-import {CidadesProvider} from '../../database/providers/Cidades';
+import {PessoasProvider} from '../../database/providers/Pessoas';
 
 export interface IParamProps {
     id?: number;
@@ -22,7 +22,7 @@ export const deleteById = async (req: Request<IParamProps>, res: Response) => {
             }
         });
     }
-    const result = await CidadesProvider.deleteById(req.params.id);
+    const result = await PessoasProvider.deleteById(req.params.id);
 
     if(result instanceof Error){
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
