@@ -21,7 +21,7 @@ const queryValidator: yup.Schema<IQuerryProps> = yup.object().shape({
 export const getAllValidation = validation((getSchema) => ({query: getSchema<IQuerryProps>(queryValidator)}));
 
 export const getAll = async (req: Request<{}, {}, {}, IQuerryProps>, res: Response) => {
-    const result = await CidadesProvider.getAll(req.query.page || 1, req.query.limit || 7, req.query.filter || '', Number(req.query.id));
+    const result = await CidadesProvider.getAll(req.query.page || 1, req.query.limit || 7, req.query.filter || '', Number(req.query.id || 0));
     const count = await CidadesProvider.count(req.query.filter as string | undefined);
 
     if(result instanceof Error){
